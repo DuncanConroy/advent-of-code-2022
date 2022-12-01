@@ -1,21 +1,16 @@
 fn main() {
     let input = std::fs::read_to_string("input.txt").unwrap();
     let mut elves = extract_elves_from_input(input);
-    let top = find_calories_of_elf_with_most_calories(&mut elves);
-    let top_three = find_calories_of_top_three_elves(&mut elves);
+    let top = find_calories_of_top_elves(&mut elves,1);
+    let top_three = find_calories_of_top_elves(&mut elves,3);
 
     println!("The elf with the most calories has {top} calories");
     println!("The top three elves carry {top_three} calories");
 }
 
-fn find_calories_of_top_three_elves(elves: &mut Vec<Elf>) -> u32 {
+fn find_calories_of_top_elves(elves: &mut Vec<Elf>, num_elves:u32) -> u32 {
     elves.sort_by(|a, b| b.calories.cmp(&a.calories));
-    elves[0].calories+ elves[1].calories + elves[2].calories
-}
-
-fn find_calories_of_elf_with_most_calories(elves: &mut Vec<Elf>) -> u32 {
-    elves.sort_by(|a, b| a.calories.cmp(&b.calories));
-    elves.last().unwrap().calories
+    elves.iter().take(num_elves as usize).map(|e| e.calories).sum()
 }
 
 fn extract_elves_from_input(input: String) -> Vec<Elf> {
@@ -44,7 +39,7 @@ impl Elf {
 #[cfg(test)]
 mod tests {
     use std::{assert_eq, vec};
-    use crate::{Elf, extract_elves_from_input, find_calories_of_elf_with_most_calories, find_calories_of_top_three_elves};
+    use super::*;
 
     #[test]
     fn extracts_elves() {
@@ -80,10 +75,14 @@ mod tests {
     #[test]
     fn finds_elf_with_most_calories() {
         // given: prepared input
-        let mut elves = vec![Elf::new(vec!["100".into(), "200".into(), "300".into(), "".into()])];
+        let mut elves = vec![
+            Elf::new(vec!["100".into(), "200".into(), "300".into(), "".into()]),
+            Elf::new(vec!["10".into(), "200".into(), "300".into(), "".into()]),
+            Elf::new(vec!["1".into(), "200".into(), "300".into(), "".into()]),
+        ];
 
         // when: searching for elf with most calories
-        let result = find_calories_of_elf_with_most_calories(&mut elves);
+        let result = find_calories_of_top_elves(&mut elves,1);
 
         // then: 3 elves are extracted
         assert_eq!(600, result);
@@ -101,7 +100,7 @@ mod tests {
         ];
 
         // when: searching for elf with most calories
-        let result = find_calories_of_top_three_elves(&mut elves);
+        let result = find_calories_of_top_elves(&mut elves,3);
 
         // then: 3 elves are extracted
         assert_eq!(620 + 610 + 604, result);
