@@ -2,6 +2,11 @@ use crate::Symbol::{Paper, Rock, Scissors};
 
 fn main() {
     let input = std::fs::read_to_string("input.txt").unwrap();
+    let score: i32 = input.lines().map(|line| {
+        let split = line.split(" ").map(map_aliases).collect::<Vec<Symbol>>();
+        calculate_score(split[0], split[1])
+    }).sum();
+    println!("The score is {score}");
 }
 
 fn calculate_score(a: Symbol, b: Symbol) -> i32 {
@@ -117,15 +122,15 @@ mod tests {
     fn calculates_correct_score() {
         // given: tuples of invocation
         let invocations_expectations = vec![
-            (Rock,Rock,4),
-            (Rock,Paper,8),
-            (Rock,Scissors,3),
-            (Paper,Rock,1),
-            (Paper,Paper,5),
-            (Paper,Scissors,9),
-            (Scissors,Rock,7),
-            (Scissors,Paper,2),
-            (Scissors,Scissors,6),
+            (Rock, Rock, 4),
+            (Rock, Paper, 8),
+            (Rock, Scissors, 3),
+            (Paper, Rock, 1),
+            (Paper, Paper, 5),
+            (Paper, Scissors, 9),
+            (Scissors, Rock, 7),
+            (Scissors, Paper, 2),
+            (Scissors, Scissors, 6),
         ];
 
         // when: calculate_score is invoked
