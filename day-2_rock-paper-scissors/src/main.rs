@@ -7,6 +7,12 @@ fn main() {
         calculate_score(split[0], split[1])
     }).sum();
     println!("The score is {score}");
+
+    let score: i32 = input.lines().map(|line| {
+        let split = line.split(" ").map(map_aliases).collect::<Vec<Symbol>>();
+        calculate_score(split[0], map_symbol_for_outcome(split[0],split[1]))
+    }).sum();
+    println!("The score is {score}");
 }
 
 fn calculate_score(a: Symbol, b: Symbol) -> i32 {
@@ -59,6 +65,26 @@ fn map_aliases(alias: &str) -> Symbol {
         C => Scissors,
         Z => Scissors,
         _ => panic!("Unknown alias {alias}"),
+    }
+}
+
+fn map_symbol_for_outcome(a: Symbol, b: Symbol) -> Symbol {
+    match a {
+        Rock => match b {
+            Rock => Scissors,
+            Paper => Rock,
+            Scissors => Paper,
+        },
+        Paper => match b {
+            Rock => Rock,
+            Paper => Paper,
+            Scissors => Scissors,
+        },
+        Scissors => match b {
+            Rock => Paper,
+            Paper => Scissors,
+            Scissors => Rock,
+        },
     }
 }
 
@@ -138,6 +164,28 @@ mod tests {
 
         // then: correct score is returned
         let expected: Vec<i32> = invocations_expectations.iter().map(|it| it.2).collect();
+        assert_eq!(expected, output);
+    }
+
+    #[test]
+    fn finds_correct_symbol_for_outcome() {
+        // given: list of symbol pairs
+        let invocations_expectations = vec![
+            (Rock, Rock, Scissors),
+            (Rock, Paper, Rock),
+            (Rock, Scissors, Paper),
+            (Paper, Rock, Rock),
+            (Paper, Paper, Paper),
+            (Paper, Scissors, Scissors),
+            (Scissors, Rock, Paper),
+            (Scissors, Paper, Scissors),
+            (Scissors, Scissors, Rock),
+        ];
+
+        // when: map symbol for outcome is invoked
+        let output: Vec<Symbol> = invocations_expectations.iter().map(|it| map_symbol_for_outcome(it.0, it.1)).collect();
+        // then: correct symbol is returned
+        let expected: Vec<Symbol> = invocations_expectations.iter().map(|it| it.2).collect();
         assert_eq!(expected, output);
     }
 }
