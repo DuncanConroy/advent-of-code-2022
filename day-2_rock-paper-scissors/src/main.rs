@@ -10,33 +10,19 @@ fn main() {
 
     let score: i32 = input.lines().map(|line| {
         let split = line.split(" ").map(map_aliases).collect::<Vec<Symbol>>();
-        calculate_score(split[0], map_symbol_for_outcome(split[0],split[1]))
+        calculate_score(split[0], map_symbol_for_outcome(split[0], split[1]))
     }).sum();
     println!("The score is {score}");
 }
 
 fn calculate_score(a: Symbol, b: Symbol) -> i32 {
-    let outcome = compare(&a, &b);
-    let result = match b {
-        Rock => 1,
-        Paper => 2,
-        Scissors => 3,
-    } + outcome;
-
-    result
+    calculate_reward(&a, &b) + b.get_value()
 }
 
-fn compare(a: &Symbol, b: &Symbol) -> i32 {
+fn calculate_reward(a: &Symbol, b: &Symbol) -> i32 {
     if a == b {
         return 3;
-    }
-    if a == &Scissors && b == &Rock {
-        return 6;
-    }
-    if a == &Paper && b == &Scissors {
-        return 6;
-    }
-    if a == &Rock && b == &Paper {
+    } else if &a.looses_against() == b {
         return 6;
     }
     0
@@ -49,42 +35,54 @@ enum Symbol {
     Scissors,
 }
 
-const A: &str = "A";
-const X: &str = "X";
-const B: &str = "B";
-const Y: &str = "Y";
-const C: &str = "C";
-const Z: &str = "Z";
-
-fn map_aliases(alias: &str) -> Symbol {
-    match alias.to_uppercase().as_str() {
-        A => Rock,
-        X => Rock,
-        B => Paper,
-        Y => Paper,
-        C => Scissors,
-        Z => Scissors,
-        _ => panic!("Unknown alias {alias}"),
+impl Symbol {
+    fn from_str(s: &str) -> Symbol {
+        let s = s.to_uppercase();
+        match s.as_str() {
+            "A" => Rock,
+            "X" => Rock,
+            "B" => Paper,
+            "Y" => Paper,
+            "C" => Scissors,
+            "Z" => Scissors,
+            _ => panic!("Unknown symbol"),
+        }
     }
-}
 
-fn map_symbol_for_outcome(a: Symbol, b: Symbol) -> Symbol {
-    match a {
-        Rock => match b {
+    fn wins_against(&self) -> Symbol {
+        match self {
             Rock => Scissors,
             Paper => Rock,
             Scissors => Paper,
-        },
-        Paper => match b {
-            Rock => Rock,
-            Paper => Paper,
-            Scissors => Scissors,
-        },
-        Scissors => match b {
+        }
+    }
+
+    fn looses_against(&self) -> Symbol {
+        match self {
             Rock => Paper,
             Paper => Scissors,
             Scissors => Rock,
-        },
+        }
+    }
+
+    fn get_value(&self) -> i32 {
+        match self {
+            Rock => 1,
+            Paper => 2,
+            Scissors => 3,
+        }
+    }
+}
+
+fn map_aliases(alias: &str) -> Symbol {
+    Symbol::from_str(alias)
+}
+
+fn map_symbol_for_outcome(a: Symbol, b: Symbol) -> Symbol {
+    match b {
+        Rock => a.wins_against(),
+        Paper => a,
+        Scissors => a.looses_against(),
     }
 }
 
@@ -99,10 +97,10 @@ mod tests {
         let scissors = Scissors;
 
         // when: rock is compared to scissors
-        let result = compare(&rock, &scissors);
+        let result = rock.wins_against();
 
         // then: rock wins
-        assert_eq!(1, result);
+        assert_eq!(scissors, result);
     }
 
     #[test]
@@ -112,10 +110,10 @@ mod tests {
         let rock = Rock;
 
         // when: paper is compared to rock
-        let result = compare(&paper, &rock);
+        let result = paper.wins_against();
 
         // then: paper wins
-        assert_eq!(1, result);
+        assert_eq!(rock, result);
     }
 
     #[test]
@@ -125,10 +123,10 @@ mod tests {
         let paper = Paper;
 
         // when: scissors is compared to paper
-        let result = compare(&scissors, &paper);
+        let result = scissors.wins_against();
 
         // then: scissors wins
-        assert_eq!(1, result);
+        assert_eq!(paper, result);
     }
 
     #[test]
