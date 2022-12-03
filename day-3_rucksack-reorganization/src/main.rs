@@ -2,8 +2,36 @@ use std::ops::Index;
 
 fn main() {
     let input = std::fs::read_to_string("input.txt").unwrap();
-    let score = calculate_sum_of_errornous_items(input);
+    let score = calculate_sum_of_errornous_items(input.clone());
     println!("The total sum of errornous items is {score}");
+
+    let score_round_two = calculate_sum_of_sticker_values(input);
+    println!("The total sum of sticker values is {score_round_two}");
+}
+
+fn calculate_sum_of_sticker_values(input:String)->i32 {
+    create_groups_of_three(input).iter()
+        .map(|it|find_common_item(it))
+        .map(|it|calculate_value(it.chars().next().unwrap()))
+        .sum()
+}
+
+fn create_groups_of_three(input: String) -> Vec<Vec<String>> {
+    let mut lines = input.lines().into_iter().map(|it|it.trim());
+    let mut groups: Vec<Vec<String>> = vec![vec![]];
+    while let Some(line) = lines.next() {
+        if groups.last().unwrap().len() == 3 {
+            groups.push(Vec::new());
+        }
+        groups.last_mut().unwrap().push(line.to_string());
+    }
+    groups
+}
+
+fn find_common_item(input: &Vec<String>) -> String {
+    input.first().unwrap().chars().find(|c| {
+        input.iter().all(|line| line.contains(*c))
+    }).unwrap().to_string()
 }
 
 fn calculate_sum_of_errornous_items(input: String) -> i32 {
@@ -118,5 +146,55 @@ mod tests {
 
         // then: we get the correct sum
         assert_eq!(result, 157);
+    }
+
+    #[test]
+    fn creates_groups_of_three() {
+        // given: a list of rucksäcke
+        let input = r#"vJrwpWtwJgWrhcsFMMfFFhFp
+            jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+            PmmdzqPrVvPwwTWBwg
+            wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+            ttgJtRGJQctTZtZT
+            CrZsJsPPZsGzwwsLwLmpwMDw"#.to_string();
+
+        // when: we group the rucksäcke into groups of three
+        let result = create_groups_of_three(input);
+
+        // then: we get two groups
+        assert_eq!(result.len(), 2);
+    }
+
+    #[test]
+    fn finds_common_item_in_group() {
+        // given: a group of three rucksäcke
+        let input = vec![
+            "vJrwpWtwJgWrhcsFMMfFFhFp".to_string(),
+            "jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL".to_string(),
+            "PmmdzqPrVvPwwTWBwg".to_string(),
+        ];
+
+        // when: we search the common item
+        let result = find_common_item(&input);
+
+        // then: we get the common item
+        assert_eq!(result, "r".to_string());
+    }
+
+    #[test]
+    fn calculates_sum_of_sticker_values() {
+        // given: a list of rucksäcke
+        let input = r#"vJrwpWtwJgWrhcsFMMfFFhFp
+            jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+            PmmdzqPrVvPwwTWBwg
+            wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+            ttgJtRGJQctTZtZT
+            CrZsJsPPZsGzwwsLwLmpwMDw"#.to_string();
+
+        // when: we calculate the sum of the sticker values
+        let result = calculate_sum_of_sticker_values(input);
+
+        // then: we get the correct sum
+        assert_eq!(result, 70);
     }
 }
