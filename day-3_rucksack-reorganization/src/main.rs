@@ -9,18 +9,18 @@ fn main() {
     println!("The total sum of sticker values is {score_round_two}");
 }
 
-fn calculate_sum_of_sticker_values(input:String)->i32 {
-    create_groups_of_three(input).iter()
-        .map(|it|find_common_item(it))
-        .map(|it|calculate_value(it.chars().next().unwrap()))
+fn calculate_sum_of_sticker_values(input: String) -> i32 {
+    create_groups_of_n(input, 3).iter()
+        .map(|it| find_common_item(it))
+        .map(|it| calculate_value(it.chars().next().unwrap()))
         .sum()
 }
 
-fn create_groups_of_three(input: String) -> Vec<Vec<String>> {
-    let mut lines = input.lines().into_iter().map(|it|it.trim());
+fn create_groups_of_n(input: String, group_size: usize) -> Vec<Vec<String>> {
+    let mut lines = input.lines().into_iter().map(|it| it.trim());
     let mut groups: Vec<Vec<String>> = vec![vec![]];
     while let Some(line) = lines.next() {
-        if groups.last().unwrap().len() == 3 {
+        if groups.last().unwrap().len() == group_size {
             groups.push(Vec::new());
         }
         groups.last_mut().unwrap().push(line.to_string());
@@ -35,9 +35,8 @@ fn find_common_item(input: &Vec<String>) -> String {
 }
 
 fn calculate_sum_of_errornous_items(input: String) -> i32 {
-    input.lines()
-        .map(|it| it.trim())
-        .map(|it| find_common_item(&get_compartments(it.to_string())))
+    create_groups_of_n(input, 1).iter()
+        .map(|it| find_common_item(&get_compartments(it.first().unwrap().to_string())))
         .map(|it| calculate_value(it.chars().next().unwrap()))
         .sum()
 }
@@ -49,7 +48,7 @@ fn calculate_value(a: char) -> i32 {
 }
 
 fn get_compartments(line: String) -> Vec<String> {
-    let half_line = line.len() / 2;
+    let half_line = line.len() >> 1;
     vec![line[..half_line].to_string(), line[half_line..].to_string()]
 }
 
@@ -152,7 +151,7 @@ mod tests {
             CrZsJsPPZsGzwwsLwLmpwMDw"#.to_string();
 
         // when: we group the rucksäcke into groups of three
-        let result = create_groups_of_three(input);
+        let result = create_groups_of_n(input, 3);
 
         // then: we get two groups
         assert_eq!(result.len(), 2);
