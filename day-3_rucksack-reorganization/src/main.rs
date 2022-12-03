@@ -37,16 +37,9 @@ fn find_common_item(input: &Vec<String>) -> String {
 fn calculate_sum_of_errornous_items(input: String) -> i32 {
     input.lines()
         .map(|it| it.trim())
-        .map(|it| find_errornous_item(it.to_string()))
+        .map(|it| find_common_item(&get_compartments(it.to_string())))
         .map(|it| calculate_value(it.chars().next().unwrap()))
         .sum()
-}
-
-fn find_errornous_item(input: String) -> String {
-    let compartments = get_compartments(input);
-    compartments.get(0).unwrap()
-        .chars()
-        .filter(|it| compartments[1].chars().position(|b| b == *it).is_some()).collect()
 }
 
 const ITEM_LIST: [char; 52] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
@@ -122,10 +115,10 @@ mod tests {
     #[test]
     fn finds_errornous_item_in_rucksack() {
         // given: a rucksack
-        let input = "vJrwpWtwJgWrhcsFMMfFFhFp".to_string();
+        let input = get_compartments("vJrwpWtwJgWrhcsFMMfFFhFp".to_string());
 
         // when: we invoke the function to find the errornous item
-        let result = find_errornous_item(input);
+        let result = find_common_item(&input);
 
         // then: we get the errornous item
         assert_eq!(result, "p".to_string());
