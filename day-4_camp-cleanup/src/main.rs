@@ -2,24 +2,17 @@ use std::ops::Range;
 
 fn main() {
     let input = std::fs::read_to_string("input.txt").unwrap();
-    let score = get_total_number_of_fully_contained_ranges(input.clone());
+    let score = get_total_number_of_overlapping_ranges(input.clone(), true);
     println!("The total sum of fully overlapping sections is {score}");
 
-    let score_round_two = get_total_number_of_overlapping_ranges(input);
+    let score_round_two = get_total_number_of_overlapping_ranges(input, false);
     println!("The total sum of partially overlapping sections is {score_round_two}");
 }
 
-fn get_total_number_of_overlapping_ranges(input: String) -> usize {
+fn get_total_number_of_overlapping_ranges(input: String, full: bool) -> usize {
     input.lines().into_iter().map(|it| it.trim())
         .map(|it| get_pair_of_sections(it.to_string()))
-        .filter(|it| check_overlap(&it[0], &it[1]))
-        .count()
-}
-
-fn get_total_number_of_fully_contained_ranges(input: String) -> usize {
-    input.lines().into_iter().map(|it| it.trim())
-        .map(|it| get_pair_of_sections(it.to_string()))
-        .filter(|it| fully_contained_in_ranges(&it[0], &it[1]))
+        .filter(|it| if full { fully_contained_in_ranges(&it[0], &it[1]) } else { check_overlap(&it[0], &it[1]) })
         .count()
 }
 
@@ -81,7 +74,7 @@ mod tests {
                 2-6,4-8"#.to_string();
 
         // when: get_total_number_of_fully_contained_ranges is called
-        let result = get_total_number_of_fully_contained_ranges(input);
+        let result = get_total_number_of_overlapping_ranges(input, true);
 
         // then: we get the correct pairs of sections
         assert_eq!(result, 2);
@@ -123,7 +116,7 @@ mod tests {
             9-9,4-6"#.to_string();
 
         // when: get_total_number_of_overlapping_ranges is called
-        let result = get_total_number_of_overlapping_ranges(input);
+        let result = get_total_number_of_overlapping_ranges(input, false);
 
         // then: we get the correct pairs of sections
         assert_eq!(result, 4);
