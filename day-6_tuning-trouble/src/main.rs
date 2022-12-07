@@ -9,6 +9,9 @@ fn main() {
     println!("First message marker after: {marker}");
 }
 
+/// refactoring opportunity: this can be easily combined with get_start_of_message_marker.
+/// I decided to keep it for learning purposes, in case someone wants to see practical examples
+/// of bit shifting
 fn get_start_of_packet_marker(input_stream: &[u8]) -> usize {
     let mut unique_tokens_found = 0u32;
     for (index, byte) in input_stream.iter().enumerate() {
@@ -36,6 +39,7 @@ fn get_start_of_message_marker(input_stream: &[u8], min_length: usize) -> usize 
         if unique_tokens_found.len() >= min_length {
             unique_tokens_found.pop_front();
             let mut unique = unique_tokens_found.iter().map(|it|*it).collect::<Vec<u8>>();
+            unique.sort();
             unique.dedup();
             if !unique_tokens_found.contains(byte) && unique.len() >= min_length-1 {
                 return index + 1;
